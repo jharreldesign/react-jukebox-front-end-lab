@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
-import * as trackService from './services/trackService';
+import { useState, useEffect } from "react";
+import * as trackService from "./services/trackService";
 
-import TrackList from './components/TrackList';
-import TrackDetail from './components/TrackDetail';
-import TrackForm from './components/TrackForm';
+import TrackList from "./components/TrackList";
+import TrackDetail from "./components/TrackDetail";
+import TrackForm from "./components/TrackForm";
+import NowPlaying from "./components/NowPlaying";
 
-import './App.css'
+import "./App.css";
 
 const App = () => {
   const [trackList, setTrackList] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [nowPlaying, setNowPlaying] = useState(null); 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -68,9 +70,14 @@ const App = () => {
       await trackService.remove(id);
       setTrackList(trackList.filter((track) => track._id !== id));
       setSelected(null);
+      if (nowPlaying && nowPlaying._id === id) setNowPlaying(null); // Stop playing if track is deleted
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const stopPlaying = () => {
+    setNowPlaying(null); // Clear the currently playing track
   };
 
   return (
@@ -81,6 +88,7 @@ const App = () => {
         handleFormView={handleFormView}
         handleEditTrack={handleEditTrack}
         handleDeleteTrack={handleDeleteTrack}
+        setNowPlaying={setNowPlaying} // Pass setNowPlaying to TrackList
         isFormOpen={isFormOpen}
       />
       {isFormOpen ? (
@@ -93,6 +101,7 @@ const App = () => {
       ) : (
         <TrackDetail selected={selected} />
       )}
+      {nowPlaying && <NowPlaying track={nowPlaying} stopPlaying={stopPlaying} />} {/* Pass stopPlaying */}
     </>
   );
 };
